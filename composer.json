@@ -22,7 +22,7 @@
     "tourze/doctrine-indexed-bundle": "0.0.*",
     "tourze/doctrine-track-bundle": "0.0.*",
     "tourze/weui-bundle": "0.0.*",
-    "tourze/http-client-bundle": "0.0.*",
+    "tourze/http-client-bundle": "0.1.*",
     "nesbot/carbon": "^2.72 || ^3",
     "symfony/yaml": "^6.4 || ^7.1",
     "yiisoft/json": "^1.0"
