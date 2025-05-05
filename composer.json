@@ -18,7 +18,7 @@
     "symfony/framework-bundle": "^6.4",
     "tourze/enum-extra": "~0.0.5",
     "tourze/xml-helper": "0.0.*",
-    "tourze/easy-admin-attribute": "0.0.*",
+    "tourze/easy-admin-attribute": "0.1.*",
     "tourze/doctrine-indexed-bundle": "0.0.*",
     "tourze/doctrine-track-bundle": "0.0.*",
     "tourze/weui-bundle": "0.0.*",
