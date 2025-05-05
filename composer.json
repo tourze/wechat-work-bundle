@@ -20,7 +20,7 @@
     "tourze/xml-helper": "0.0.*",
     "tourze/easy-admin-attribute": "0.1.*",
     "tourze/doctrine-indexed-bundle": "0.0.*",
-    "tourze/doctrine-track-bundle": "0.0.*",
+    "tourze/doctrine-track-bundle": "0.1.*",
     "tourze/weui-bundle": "0.0.*",
     "tourze/http-client-bundle": "0.1.*",
     "nesbot/carbon": "^2.72 || ^3",
