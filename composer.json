@@ -25,7 +25,8 @@
     "tourze/http-client-bundle": "0.1.*",
     "nesbot/carbon": "^2.72 || ^3",
     "symfony/yaml": "^6.4 || ^7.1",
-    "yiisoft/json": "^1.0"
+    "yiisoft/json": "^1.0",
+    "tourze/doctrine-timestamp-bundle": "0.0.*"
   },
   "autoload": {
     "psr-4": {
