@@ -30,7 +30,6 @@
     "tourze/enum-extra": "~0.0.5",
     "tourze/http-client-bundle": "0.1.*",
     "tourze/symfony-cron-job-bundle": "0.1.*",
-    "tourze/xml-helper": "0.0.*",
     "yiisoft/json": "^1.0"
   },
   "require-dev": {
