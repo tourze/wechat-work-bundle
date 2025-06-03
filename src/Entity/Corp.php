@@ -26,6 +26,7 @@ use Tourze\EasyAdmin\Attribute\Field\FormField;
 use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EasyAdmin\Attribute\Filter\Keyword;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
+use Tourze\WechatWorkContracts\CorpInterface;
 use WechatWorkBundle\Repository\CorpRepository;
 
 #[AsPermission(title: '企业信息')]
@@ -35,7 +36,7 @@ use WechatWorkBundle\Repository\CorpRepository;
 #[Creatable]
 #[ORM\Entity(repositoryClass: CorpRepository::class)]
 #[ORM\Table(name: 'wechat_work_corp', options: ['comment' => '企业信息'])]
-class Corp implements \Stringable
+class Corp implements \Stringable, CorpInterface
 {
     #[ListColumn(order: -1)]
     #[ExportColumn]
