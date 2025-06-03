@@ -24,6 +24,7 @@ use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EasyAdmin\Attribute\Filter\Keyword;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EnumExtra\Itemable;
+use Tourze\WechatWorkContracts\AgentInterface;
 use WechatWorkBundle\Repository\AgentRepository;
 
 /**
@@ -42,7 +43,7 @@ use WechatWorkBundle\Repository\AgentRepository;
 #[ORM\UniqueConstraint(name: 'wechat_work_agent_uniq_name', columns: ['corp_id', 'name'])]
 #[ORM\UniqueConstraint(name: 'wechat_work_agent_uniq_agent_id', columns: ['corp_id', 'agent_id'])]
 #[ORM\HasLifecycleCallbacks]
-class Agent implements \Stringable, Itemable, AccessTokenAware
+class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
 {
     #[ListColumn(order: -1)]
     #[ExportColumn]
