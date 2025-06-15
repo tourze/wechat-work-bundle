@@ -57,7 +57,7 @@ class GetAgentInfoRequestTest extends TestCase
     
     public function testRequestWithEmptyAgent(): void
     {
-        $this->expectException(\Error::class);
-        $this->request->getRequestOptions();
+        // 当没有设置agent时，应该返回空数组
+        $this->assertEquals([], $this->request->getRequestOptions());
     }
 } 

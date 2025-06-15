@@ -2,19 +2,18 @@
 
 namespace WechatWorkBundle\Request;
 
-use WechatWorkBundle\Entity\AccessTokenAware;
 use WechatWorkBundle\Entity\Agent;
 
 trait AgentAware
 {
-    private Agent|AccessTokenAware $agent;
+    private ?Agent $agent = null;
 
-    public function getAgent(): Agent|AccessTokenAware
+    public function getAgent(): ?Agent
     {
         return $this->agent;
     }
 
-    public function setAgent(Agent|AccessTokenAware $agent): void
+    public function setAgent(?Agent $agent): void
     {
         $this->agent = $agent;
     }

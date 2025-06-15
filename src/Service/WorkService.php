@@ -87,9 +87,12 @@ class WorkService extends ApiClient
         // 补充 AccessToken
         if (in_array(AgentAware::class, class_uses($request)) && !isset($options['query']['access_token'])) {
             /* @var AgentAware $request */
-            $this->refreshAgentAccessToken($request->getAgent());
-            $token = $request->getAgent()->getAccessToken();
-            $options['query']['access_token'] = $token;
+            $agent = $request->getAgent();
+            if ($agent) {
+                $this->refreshAgentAccessToken($agent);
+                $token = $agent->getAccessToken();
+                $options['query']['access_token'] = $token;
+            }
         }
 
         // 如果我们当前是在开发模式的话，默认加个调试参数，方便我们事后去排查接口问题
@@ -105,7 +108,7 @@ class WorkService extends ApiClient
     protected function formatResponse(RequestInterface $request, ResponseInterface $response): mixed
     {
         if ($request instanceof RawResponseInterface) {
-            return $response;
+            return $response->getContent();
         }
         $json = $response->getContent();
         $json = Json::decode($json);

@@ -63,6 +63,29 @@ class RefreshAgentAccessTokenCommandTest extends TestCase
     
     public function testExecute_WithExceptionInApiCall(): void
     {
-        $this->markTestSkipped('API异常测试跳过');
+        $agentRepository = $this->createMock(AgentRepository::class);
+        $workService = $this->createMock(WorkService::class);
+        
+        $agent = $this->createMock(Agent::class);
+        $agent->method('__toString')->willReturn('Test Agent');
+        
+        $agentRepository->method('findAll')->willReturn([$agent]);
+        
+        // 模拟API调用抛出异常
+        $workService->method('refreshAgentAccessToken')
+            ->willThrowException(new \Exception('API调用失败'));
+        
+        $command = new RefreshAgentAccessTokenCommand($agentRepository, $workService);
+        
+        $application = new Application();
+        $application->add($command);
+        
+        $commandTester = new CommandTester($command);
+        
+        // 由于命令没有异常处理，应该抛出异常
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('API调用失败');
+        
+        $commandTester->execute(['command' => $command->getName()]);
     }
 } 

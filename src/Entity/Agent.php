@@ -298,8 +298,12 @@ class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
     #[ORM\PrePersist]
     public function prePersist(): void
     {
-        $this->setAgentId(trim($this->getAgentId()));
-        $this->setSecret(trim($this->getSecret()));
+        if ($this->getAgentId() !== null) {
+            $this->setAgentId(trim($this->getAgentId()));
+        }
+        if ($this->getSecret() !== null) {
+            $this->setSecret(trim($this->getSecret()));
+        }
     }
 
     public function getPrivateKeyContent(): ?string

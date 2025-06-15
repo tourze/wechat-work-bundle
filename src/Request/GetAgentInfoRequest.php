@@ -20,6 +20,10 @@ class GetAgentInfoRequest extends ApiRequest
 
     public function getRequestOptions(): ?array
     {
+        if (!$this->getAgent()) {
+            return [];
+        }
+        
         return [
             'query' => [
                 'agentid' => $this->getAgent()->getAgentId(),

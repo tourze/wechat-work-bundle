@@ -133,13 +133,36 @@ class WorkServiceTest extends TestCase
         $this->assertSame(['query' => []], $options);
     }
     
-    /**
-     * 由于PHP中接口不能直接实例化，我们不能简单地模拟同时实现两个接口的对象
-     * 为了解决这个问题，我们暂时标记这个测试为"已跳过"
-     */
     public function testFormatResponse_WithRawResponse(): void
     {
-        $this->markTestSkipped('RawResponseInterface测试需要重构');
+        $request = new class implements \HttpClientBundle\Request\RequestInterface, \WechatWorkBundle\Request\RawResponseInterface {
+            public function getRequestMethod(): ?string
+            {
+                return 'GET';
+            }
+            
+            public function getUrl(): string
+            {
+                return 'https://api.test.com';
+            }
+            
+            public function getRequestPath(): string
+            {
+                return '/test';
+            }
+            
+            public function getRequestOptions(): array
+            {
+                return [];
+            }
+        };
+        
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getContent')->willReturn('raw response content');
+        
+        $result = $this->invokePrivateMethod($this->workService, 'formatResponse', [$request, $response]);
+        
+        $this->assertSame('raw response content', $result);
     }
     
     public function testFormatResponse_WithSuccessResponse(): void
