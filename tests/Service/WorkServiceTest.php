@@ -10,22 +10,18 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use WechatWorkBundle\Entity\Agent;
 use WechatWorkBundle\Entity\Corp;
-use WechatWorkBundle\Repository\AgentRepository;
 use WechatWorkBundle\Service\WorkService;
 
 class WorkServiceTest extends TestCase
 {
-    private AgentRepository $agentRepository;
     private EntityManagerInterface $entityManager;
     private WorkService $workService;
     
     protected function setUp(): void
     {
-        $this->agentRepository = $this->createMock(AgentRepository::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         
         $this->workService = new WorkService(
-            $this->agentRepository,
             $this->entityManager
         );
     }
@@ -136,7 +132,7 @@ class WorkServiceTest extends TestCase
     public function testFormatResponse_WithRawResponse(): void
     {
         $request = new class implements \HttpClientBundle\Request\RequestInterface, \WechatWorkBundle\Request\RawResponseInterface {
-            public function getRequestMethod(): ?string
+            public function getRequestMethod(): string
             {
                 return 'GET';
             }
