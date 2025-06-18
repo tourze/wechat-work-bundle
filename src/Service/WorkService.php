@@ -11,6 +11,7 @@ use HttpClientBundle\Request\RequestInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use WechatWorkBundle\Entity\Agent;
+use WechatWorkBundle\Repository\AgentRepository;
 use WechatWorkBundle\Request\AgentAware;
 use WechatWorkBundle\Request\GetTokenRequest;
 use WechatWorkBundle\Request\RawResponseInterface;
@@ -25,6 +26,7 @@ class WorkService extends ApiClient
     use ClientTrait;
 
     public function __construct(
+        private readonly AgentRepository $agentRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -84,7 +86,7 @@ class WorkService extends ApiClient
 
         // 补充 AccessToken
         if (in_array(AgentAware::class, class_uses($request)) && !isset($options['query']['access_token'])) {
-            /** @var RequestInterface&AgentAware $request */
+            /* @var AgentAware $request */
             $agent = $request->getAgent();
             if ($agent) {
                 $this->refreshAgentAccessToken($agent);

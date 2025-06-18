@@ -78,12 +78,12 @@ class CorpTest extends TestCase
     public function testTimestampFields(): void
     {
         $corp = new Corp();
-        $now = new \DateTimeImmutable();
+        $now = new \DateTime();
         
         $corp->setCreateTime($now);
         $this->assertSame($now, $corp->getCreateTime());
         
-        $updateTime = new \DateTimeImmutable();
+        $updateTime = new \DateTime();
         $corp->setUpdateTime($updateTime);
         $this->assertSame($updateTime, $corp->getUpdateTime());
     }

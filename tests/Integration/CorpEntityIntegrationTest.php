@@ -91,8 +91,8 @@ class CorpEntityIntegrationTest extends TestCase
     public function testCorpUserTrackingProperties(): void
     {
         $corp = new Corp();
-        $createTime = new \DateTimeImmutable();
-        $updateTime = new \DateTimeImmutable();
+        $createTime = new \DateTime();
+        $updateTime = new \DateTime();
         
         $corp->setCreatedBy('admin');
         $corp->setUpdatedBy('user');

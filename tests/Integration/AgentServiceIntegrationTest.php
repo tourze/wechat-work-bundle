@@ -2,12 +2,18 @@
 
 namespace WechatWorkBundle\Tests\Integration;
 
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use WechatWorkBundle\Entity\Agent;
 use WechatWorkBundle\Entity\Corp;
+use WechatWorkBundle\Repository\AgentRepository;
+use WechatWorkBundle\Service\WorkService;
 
 class AgentServiceIntegrationTest extends TestCase
 {
+    private AgentRepository $agentRepository;
+    private WorkService $workService;
+    private EntityManagerInterface $entityManager;
     
     public function testAgentWithCorpRelationship(): void
     {
@@ -116,4 +122,10 @@ class AgentServiceIntegrationTest extends TestCase
         $this->assertSame($tags, $agent->getAllowTags());
     }
     
+    protected function setUp(): void
+    {
+        $this->agentRepository = $this->createMock(AgentRepository::class);
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->workService = new WorkService($this->agentRepository, $this->entityManager);
+    }
 }
