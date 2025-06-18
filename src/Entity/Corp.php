@@ -12,32 +12,18 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
 use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
 use Tourze\EasyAdmin\Attribute\Action\Listable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Keyword;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\WechatWorkContracts\CorpInterface;
 use WechatWorkBundle\Repository\CorpRepository;
 
-#[AsPermission(title: '企业信息')]
 #[Listable]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[ORM\Entity(repositoryClass: CorpRepository::class)]
 #[ORM\Table(name: 'wechat_work_corp', options: ['comment' => '企业信息'])]
 class Corp implements \Stringable, CorpInterface
 {
     use TimestampableAware;
     use BlameableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -45,17 +31,11 @@ class Corp implements \Stringable, CorpInterface
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField(span: 12)]
-    #[Keyword]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 32, unique: true, options: ['comment' => '名称'])]
     private ?string $name = null;
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField(span: 12)]
-    #[Keyword]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 64, unique: true, options: ['comment' => '企业ID'])]
     private ?string $corpId = null;
 
@@ -63,12 +43,10 @@ class Corp implements \Stringable, CorpInterface
      * @var Collection<Agent>
      */
     #[Groups(['admin_curd'])]
-    #[ListColumn(title: '应用')]
     #[CurdAction(label: '应用管理')]
     #[ORM\OneToMany(targetEntity: Agent::class, mappedBy: 'corp', cascade: ['persist'], orphanRemoval: true)]
     private Collection $agents;
 
-    #[ListColumn]
     #[ORM\Column(nullable: true, options: ['comment' => '来自服务商授权'])]
     private ?bool $fromProvider = false;
 

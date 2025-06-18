@@ -10,15 +10,7 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
 use Tourze\EasyAdmin\Attribute\Action\Listable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Keyword;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\EnumExtra\Itemable;
 use Tourze\WechatWorkContracts\AgentInterface;
 use WechatWorkBundle\Repository\AgentRepository;
@@ -29,11 +21,7 @@ use WechatWorkBundle\Repository\AgentRepository;
  * @see https://developer.work.weixin.qq.com/document/path/90967
  * @see https://developer.work.weixin.qq.com/document/path/96448
  */
-#[AsPermission(title: '应用')]
 #[Listable]
-#[Deletable]
-#[Editable]
-#[Creatable]
 #[ORM\Entity(repositoryClass: AgentRepository::class)]
 #[ORM\Table(name: 'wechat_work_agent', options: ['comment' => '应用'])]
 #[ORM\UniqueConstraint(name: 'wechat_work_agent_uniq_name', columns: ['corp_id', 'name'])]
@@ -43,8 +31,6 @@ class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
 {
     use TimestampableAware;
     use BlameableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -56,34 +42,25 @@ class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField]
-    #[Keyword]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '名称'])]
     private ?string $name = null;
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField(span: 7)]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 64, options: ['comment' => 'AgentId'])]
     private ?string $agentId = null;
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField(span: 17)]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => 'Secret'])]
     private ?string $secret = null;
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 120, nullable: true, options: ['comment' => '服务端消息Token'])]
     private ?string $token = null;
 
     #[Groups(['admin_curd'])]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '服务端消息EncodingAESKey'])]
     private ?string $encodingAESKey = null;
 
@@ -95,19 +72,16 @@ class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '私钥内容'])]
     private ?string $privateKeyContent = null;
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField]
     #[ORM\Column(length: 20, nullable: true, options: ['comment' => '私钥版本'])]
     private ?string $privateKeyVersion = null;
 
     #[Groups(['admin_curd'])]
     #[TrackColumn]
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '欢迎语'])]
     private ?string $welcomeText = null;
 
