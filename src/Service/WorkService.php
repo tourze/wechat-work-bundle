@@ -2,7 +2,7 @@
 
 namespace WechatWorkBundle\Service;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use HttpClientBundle\Client\ApiClient;
 use HttpClientBundle\Client\ClientTrait;
@@ -36,13 +36,13 @@ class WorkService extends ApiClient
 
     public function refreshAgentAccessToken(Agent $agent): void
     {
-        $now = Carbon::now()->subMinutes(5);
+        $now = CarbonImmutable::now()->subMinutes(5);
 
         if (empty($agent->getSecret())) {
             return;
         }
         if ($agent->getAccessTokenExpireTime() === null) {
-            $agent->setAccessTokenExpireTime(Carbon::now()->lastOfYear()->toDateTimeImmutable());
+            $agent->setAccessTokenExpireTime(CarbonImmutable::now()->lastOfYear()->toDateTimeImmutable());
         }
         if ($agent->getAccessToken() !== null && $agent->getAccessToken() !== '' && $now->greaterThan($agent->getAccessTokenExpireTime())) {
             $agent->setAccessToken('');
@@ -61,7 +61,7 @@ class WorkService extends ApiClient
                 ]);
             } else {
                 $agent->setAccessToken($tokenResponse['access_token']);
-                $agent->setAccessTokenExpireTime(Carbon::now()->addSeconds($tokenResponse['expires_in'])->toDateTimeImmutable());
+                $agent->setAccessTokenExpireTime(CarbonImmutable::now()->addSeconds($tokenResponse['expires_in'])->toDateTimeImmutable());
                 $this->entityManager->persist($agent);
                 $this->entityManager->flush();
             }

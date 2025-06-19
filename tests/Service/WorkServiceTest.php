@@ -2,7 +2,7 @@
 
 namespace WechatWorkBundle\Tests\Service;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use HttpClientBundle\Exception\HttpClientException;
 use HttpClientBundle\Request\RequestInterface;
@@ -55,7 +55,7 @@ class WorkServiceTest extends TestCase
         
         // 设置有效的token和过期时间
         $agent->setAccessToken('valid_token');
-        $agent->setAccessTokenExpireTime(Carbon::now()->addHour()->toDateTimeImmutable());
+        $agent->setAccessTokenExpireTime(CarbonImmutable::now()->addHour()->toDateTimeImmutable());
         
         $this->workService->refreshAgentAccessToken($agent);
         
@@ -75,7 +75,7 @@ class WorkServiceTest extends TestCase
         // 修改这里的期望调用次数
         // PHPUnit 在验证方法调用次数时有些限制
         $agent->method('getAccessTokenExpireTime')
-            ->willReturn(Carbon::now()->subHour()->toDateTimeImmutable());
+            ->willReturn(CarbonImmutable::now()->subHour()->toDateTimeImmutable());
         
         $agent->method('getAccessToken')
             ->willReturn('expired_token');
