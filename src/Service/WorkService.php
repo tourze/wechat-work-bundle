@@ -41,14 +41,14 @@ class WorkService extends ApiClient
         if (empty($agent->getSecret())) {
             return;
         }
-        if (!$agent->getAccessTokenExpireTime()) {
-            $agent->setAccessTokenExpireTime(Carbon::now()->lastOfYear());
+        if ($agent->getAccessTokenExpireTime() === null) {
+            $agent->setAccessTokenExpireTime(Carbon::now()->lastOfYear()->toDateTimeImmutable());
         }
-        if ($agent->getAccessToken() && $now->greaterThan($agent->getAccessTokenExpireTime())) {
+        if ($agent->getAccessToken() !== null && $agent->getAccessToken() !== '' && $now->greaterThan($agent->getAccessTokenExpireTime())) {
             $agent->setAccessToken('');
         }
 
-        if (!$agent->getAccessToken()) {
+        if ($agent->getAccessToken() === null || $agent->getAccessToken() === '') {
             $request = new GetTokenRequest();
             $request->setCorpId($agent->getCorp()->getCorpId());
             $request->setCorpSecret($agent->getSecret());
@@ -61,7 +61,7 @@ class WorkService extends ApiClient
                 ]);
             } else {
                 $agent->setAccessToken($tokenResponse['access_token']);
-                $agent->setAccessTokenExpireTime(Carbon::now()->addSeconds($tokenResponse['expires_in']));
+                $agent->setAccessTokenExpireTime(Carbon::now()->addSeconds($tokenResponse['expires_in'])->toDateTimeImmutable());
                 $this->entityManager->persist($agent);
                 $this->entityManager->flush();
             }

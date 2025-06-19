@@ -12,12 +12,9 @@ use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
-use Tourze\EasyAdmin\Attribute\Action\CurdAction;
-use Tourze\EasyAdmin\Attribute\Action\Listable;
 use Tourze\WechatWorkContracts\CorpInterface;
 use WechatWorkBundle\Repository\CorpRepository;
 
-#[Listable]
 #[ORM\Entity(repositoryClass: CorpRepository::class)]
 #[ORM\Table(name: 'wechat_work_corp', options: ['comment' => '企业信息'])]
 class Corp implements \Stringable, CorpInterface
@@ -43,7 +40,6 @@ class Corp implements \Stringable, CorpInterface
      * @var Collection<Agent>
      */
     #[Groups(['admin_curd'])]
-    #[CurdAction(label: '应用管理')]
     #[ORM\OneToMany(targetEntity: Agent::class, mappedBy: 'corp', cascade: ['persist'], orphanRemoval: true)]
     private Collection $agents;
 
@@ -66,7 +62,7 @@ class Corp implements \Stringable, CorpInterface
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null || $this->getId() === 0) {
             return '';
         }
 

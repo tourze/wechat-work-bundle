@@ -16,9 +16,10 @@ use WechatWorkBundle\Service\WorkService;
  * @see https://developer.work.weixin.qq.com/document/path/96448
  */
 #[AsCronTask('*/10 * * * *')]
-#[AsCommand(name: 'wechat-work:sync-agent-info', description: '同步应用信息')]
+#[AsCommand(name: self::NAME, description: '同步应用信息')]
 class SyncAgentInfoCommand extends Command
 {
+    public const NAME = 'wechat-work:sync-agent-info';
     public function __construct(
         private readonly AgentRepository $agentRepository,
         private readonly WorkService $workService,

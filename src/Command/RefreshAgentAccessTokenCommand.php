@@ -11,9 +11,10 @@ use WechatWorkBundle\Repository\AgentRepository;
 use WechatWorkBundle\Service\WorkService;
 
 #[AsCronTask('* * * * *')]
-#[AsCommand(name: 'wechat-work:refresh-agent-access-token', description: '刷新企业微信应用access_token')]
+#[AsCommand(name: self::NAME, description: '刷新企业微信应用access_token')]
 class RefreshAgentAccessTokenCommand extends Command
 {
+    public const NAME = 'wechat-work:refresh-agent-access-token';
     public function __construct(
         private readonly AgentRepository $agentRepository,
         private readonly WorkService $workService,

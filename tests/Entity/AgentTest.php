@@ -2,7 +2,7 @@
 
 namespace WechatWorkBundle\Tests\Entity;
 
-use DateTime;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use WechatWorkBundle\Entity\AccessTokenAware;
 use WechatWorkBundle\Entity\Agent;
@@ -74,7 +74,7 @@ class AgentTest extends TestCase
     
     public function testSetAndGetAccessTokenExpireTime(): void
     {
-        $expireTime = new DateTime();
+        $expireTime = new DateTimeImmutable();
         
         $this->agent->setAccessTokenExpireTime($expireTime);
         

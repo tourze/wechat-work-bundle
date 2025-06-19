@@ -10,22 +10,18 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use WechatWorkBundle\Entity\Agent;
 use WechatWorkBundle\Entity\Corp;
-use WechatWorkBundle\Repository\AgentRepository;
 use WechatWorkBundle\Service\WorkService;
 
 class WorkServiceTest extends TestCase
 {
-    private AgentRepository $agentRepository;
     private EntityManagerInterface $entityManager;
     private WorkService $workService;
     
     protected function setUp(): void
     {
-        $this->agentRepository = $this->createMock(AgentRepository::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         
         $this->workService = new WorkService(
-            $this->agentRepository,
             $this->entityManager
         );
     }
@@ -59,7 +55,7 @@ class WorkServiceTest extends TestCase
         
         // 设置有效的token和过期时间
         $agent->setAccessToken('valid_token');
-        $agent->setAccessTokenExpireTime(Carbon::now()->addHour());
+        $agent->setAccessTokenExpireTime(Carbon::now()->addHour()->toDateTimeImmutable());
         
         $this->workService->refreshAgentAccessToken($agent);
         
@@ -79,7 +75,7 @@ class WorkServiceTest extends TestCase
         // 修改这里的期望调用次数
         // PHPUnit 在验证方法调用次数时有些限制
         $agent->method('getAccessTokenExpireTime')
-            ->willReturn(Carbon::now()->subHour());
+            ->willReturn(Carbon::now()->subHour()->toDateTimeImmutable());
         
         $agent->method('getAccessToken')
             ->willReturn('expired_token');
@@ -136,7 +132,7 @@ class WorkServiceTest extends TestCase
     public function testFormatResponse_WithRawResponse(): void
     {
         $request = new class implements \HttpClientBundle\Request\RequestInterface, \WechatWorkBundle\Request\RawResponseInterface {
-            public function getRequestMethod(): ?string
+            public function getRequestMethod(): string
             {
                 return 'GET';
             }
