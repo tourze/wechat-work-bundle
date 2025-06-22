@@ -2,18 +2,18 @@
 
 namespace WechatWorkBundle\Request;
 
-use WechatWorkBundle\Entity\Agent;
+use Tourze\WechatWorkContracts\AgentInterface;
 
 trait AgentAware
 {
-    private ?Agent $agent = null;
+    private ?AgentInterface $agent = null;
 
-    public function getAgent(): ?Agent
+    public function getAgent(): ?AgentInterface
     {
         return $this->agent;
     }
 
-    public function setAgent(?Agent $agent): void
+    public function setAgent(?AgentInterface $agent): void
     {
         $this->agent = $agent;
     }
