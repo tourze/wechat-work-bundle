@@ -72,7 +72,7 @@ class WorkService extends ApiClient
     {
         $method = $request->getRequestMethod();
 
-        return $method ?: 'POST';
+        return $method ?? 'POST';
     }
 
     protected function getRequestOptions(RequestInterface $request): ?array

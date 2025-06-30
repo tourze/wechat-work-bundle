@@ -10,7 +10,7 @@ use Tourze\Symfony\CronJob\Attribute\AsCronTask;
 use WechatWorkBundle\Repository\AgentRepository;
 use WechatWorkBundle\Service\WorkService;
 
-#[AsCronTask('* * * * *')]
+#[AsCronTask(expression: '* * * * *')]
 #[AsCommand(name: self::NAME, description: '刷新企业微信应用access_token')]
 class RefreshAgentAccessTokenCommand extends Command
 {

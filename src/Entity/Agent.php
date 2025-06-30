@@ -37,27 +37,27 @@ class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
     #[ORM\JoinColumn(nullable: false)]
     private ?Corp $corp = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '名称'])]
     private ?string $name = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 64, options: ['comment' => 'AgentId'])]
     private ?string $agentId = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => 'Secret'])]
     private ?string $secret = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 120, nullable: true, options: ['comment' => '服务端消息Token'])]
     private ?string $token = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '服务端消息EncodingAESKey'])]
     private ?string $encodingAESKey = null;
 
@@ -67,17 +67,17 @@ class Agent implements \Stringable, Itemable, AccessTokenAware, AgentInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => 'Access Token 过期时间'])]
     private ?\DateTimeImmutable $accessTokenExpireTime = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '私钥内容'])]
     private ?string $privateKeyContent = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(length: 20, nullable: true, options: ['comment' => '私钥版本'])]
     private ?string $privateKeyVersion = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '欢迎语'])]
     private ?string $welcomeText = null;

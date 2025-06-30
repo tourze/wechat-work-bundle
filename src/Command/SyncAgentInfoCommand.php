@@ -15,7 +15,7 @@ use WechatWorkBundle\Service\WorkService;
 /**
  * @see https://developer.work.weixin.qq.com/document/path/96448
  */
-#[AsCronTask('*/10 * * * *')]
+#[AsCronTask(expression: '*/10 * * * *')]
 #[AsCommand(name: self::NAME, description: '同步应用信息')]
 class SyncAgentInfoCommand extends Command
 {

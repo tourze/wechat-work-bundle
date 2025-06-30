@@ -26,12 +26,12 @@ class Corp implements \Stringable, CorpInterface
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
     private ?int $id = 0;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 32, unique: true, options: ['comment' => '名称'])]
     private ?string $name = null;
 
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
     #[ORM\Column(type: Types::STRING, length: 64, unique: true, options: ['comment' => '企业ID'])]
     private ?string $corpId = null;
@@ -39,7 +39,7 @@ class Corp implements \Stringable, CorpInterface
     /**
      * @var Collection<Agent>
      */
-    #[Groups(['admin_curd'])]
+    #[Groups(groups: ['admin_curd'])]
     #[ORM\OneToMany(targetEntity: Agent::class, mappedBy: 'corp', cascade: ['persist'], orphanRemoval: true)]
     private Collection $agents;
 
