@@ -3,6 +3,7 @@
 namespace WechatWorkBundle\Request;
 
 use HttpClientBundle\Request\ApiRequest;
+use WechatWorkBundle\Constant\ApiPath;
 
 /**
  * 获取access_token
@@ -23,9 +24,12 @@ class GetTokenRequest extends ApiRequest
 
     public function getRequestPath(): string
     {
-        return '/cgi-bin/gettoken';
+        return ApiPath::GET_TOKEN;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getRequestOptions(): ?array
     {
         return [

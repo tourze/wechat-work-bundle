@@ -5,12 +5,19 @@ namespace WechatWorkBundle\Service;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use HttpClientBundle\Client\ApiClient;
-use HttpClientBundle\Client\ClientTrait;
-use HttpClientBundle\Exception\HttpClientException;
+use HttpClientBundle\Exception\GeneralHttpClientException;
 use HttpClientBundle\Request\RequestInterface;
+use HttpClientBundle\Service\SmartHttpClient;
+use Monolog\Attribute\WithMonologChannel;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService;
 use WechatWorkBundle\Entity\Agent;
+use WechatWorkBundle\Exception\HttpClientException;
 use WechatWorkBundle\Request\AgentAware;
 use WechatWorkBundle\Request\GetTokenRequest;
 use WechatWorkBundle\Request\RawResponseInterface;
@@ -18,15 +25,73 @@ use Yiisoft\Json\Json;
 
 /**
  * 企业微信服务发起
+ *
+ * @method void asyncRequest(\HttpClientBundle\Request\ApiRequest $request) 发起异步请求，不关心响应结果
  */
 #[Autoconfigure(public: true)]
-class WorkService extends ApiClient
+#[WithMonologChannel(channel: 'wechat_work')]
+class WorkService extends ApiClient implements WorkServiceInterface
 {
-    use ClientTrait;
-
     public function __construct(
+        private readonly LoggerInterface $logger,
         private readonly EntityManagerInterface $entityManager,
+        private readonly SmartHttpClient $httpClient,
+        private readonly LockFactory $lockFactory,
+        private readonly CacheInterface $cache,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly AsyncInsertService $asyncInsertService,
     ) {
+    }
+
+    protected function getLockFactory(): LockFactory
+    {
+        return $this->lockFactory;
+    }
+
+    protected function getHttpClient(): SmartHttpClient
+    {
+        return $this->httpClient;
+    }
+
+    protected function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    protected function getCache(): CacheInterface
+    {
+        return $this->cache;
+    }
+
+    /**
+     * 优先使用Request中定义的地址
+     */
+    protected function getRequestUrl(RequestInterface $request): string
+    {
+        $path = ltrim($request->getRequestPath(), '/');
+        if (str_starts_with($path, 'https://')) {
+            return $path;
+        }
+        if (str_starts_with($path, 'http://')) {
+            return $path;
+        }
+
+        $domain = trim($this->getBaseUrl());
+        if ('' === $domain) {
+            throw new \RuntimeException(self::class . '缺少getBaseUrl的定义');
+        }
+
+        return "{$domain}/{$path}";
+    }
+
+    protected function getEventDispatcher(): EventDispatcherInterface
+    {
+        return $this->eventDispatcher;
+    }
+
+    protected function getAsyncInsertService(): AsyncInsertService
+    {
+        return $this->asyncInsertService;
     }
 
     public function getBaseUrl(): string
@@ -36,36 +101,90 @@ class WorkService extends ApiClient
 
     public function refreshAgentAccessToken(Agent $agent): void
     {
-        $now = CarbonImmutable::now()->subMinutes(5);
-
-        if (empty($agent->getSecret())) {
+        $secret = $agent->getSecret();
+        if (null === $secret || '' === $secret) {
             return;
         }
-        if ($agent->getAccessTokenExpireTime() === null) {
+
+        $this->ensureAccessTokenExpireTime($agent);
+        $this->clearExpiredAccessToken($agent);
+
+        if ($this->needsNewAccessToken($agent)) {
+            $this->fetchAndSetAccessToken($agent);
+        }
+    }
+
+    private function ensureAccessTokenExpireTime(Agent $agent): void
+    {
+        if (null === $agent->getAccessTokenExpireTime()) {
             $agent->setAccessTokenExpireTime(CarbonImmutable::now()->lastOfYear()->toDateTimeImmutable());
         }
-        if ($agent->getAccessToken() !== null && $agent->getAccessToken() !== '' && $now->greaterThan($agent->getAccessTokenExpireTime())) {
+    }
+
+    private function clearExpiredAccessToken(Agent $agent): void
+    {
+        $now = CarbonImmutable::now()->subMinutes(5);
+        $expireTime = $agent->getAccessTokenExpireTime();
+
+        if ($this->hasValidToken($agent) && null !== $expireTime && $now->greaterThan($expireTime)) {
             $agent->setAccessToken('');
         }
+    }
 
-        if ($agent->getAccessToken() === null || $agent->getAccessToken() === '') {
-            $request = new GetTokenRequest();
-            $request->setCorpId($agent->getCorp()->getCorpId());
-            $request->setCorpSecret($agent->getSecret());
-            $tokenResponse = $this->request($request);
+    private function hasValidToken(Agent $agent): bool
+    {
+        return null !== $agent->getAccessToken() && '' !== $agent->getAccessToken();
+    }
 
-            if (!isset($tokenResponse['access_token'])) {
-                $this->apiClientLogger?->error('获取企业微信应用AccessToken失败', [
-                    'agent' => $agent,
-                    'tokenResponse' => $tokenResponse,
-                ]);
-            } else {
-                $agent->setAccessToken($tokenResponse['access_token']);
-                $agent->setAccessTokenExpireTime(CarbonImmutable::now()->addSeconds($tokenResponse['expires_in'])->toDateTimeImmutable());
-                $this->entityManager->persist($agent);
-                $this->entityManager->flush();
-            }
+    private function needsNewAccessToken(Agent $agent): bool
+    {
+        return !$this->hasValidToken($agent);
+    }
+
+    private function fetchAndSetAccessToken(Agent $agent): void
+    {
+        $corp = $agent->getCorp();
+        if (null === $corp) {
+            return;
         }
+
+        $corpId = $corp->getCorpId();
+        $secret = $agent->getSecret();
+
+        if (null === $corpId || null === $secret) {
+            return;
+        }
+
+        $request = new GetTokenRequest();
+        $request->setCorpId($corpId);
+        $request->setCorpSecret($secret);
+        $tokenResponse = $this->request($request);
+
+        if (!is_array($tokenResponse) || !isset($tokenResponse['access_token'], $tokenResponse['expires_in'])) {
+            $this->logger->error('获取企业微信应用AccessToken失败', [
+                'agent' => $agent,
+                'tokenResponse' => $tokenResponse,
+            ]);
+
+            return;
+        }
+
+        $accessToken = $tokenResponse['access_token'];
+        $expiresIn = $tokenResponse['expires_in'];
+
+        if (!is_string($accessToken) || !is_int($expiresIn)) {
+            $this->logger->error('AccessToken响应格式错误', [
+                'agent' => $agent,
+                'tokenResponse' => $tokenResponse,
+            ]);
+
+            return;
+        }
+
+        $agent->setAccessToken($accessToken);
+        $agent->setAccessTokenExpireTime(CarbonImmutable::now()->addSeconds($expiresIn)->toDateTimeImmutable());
+        $this->entityManager->persist($agent);
+        $this->entityManager->flush();
     }
 
     protected function getRequestMethod(RequestInterface $request): string
@@ -75,21 +194,28 @@ class WorkService extends ApiClient
         return $method ?? 'POST';
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     protected function getRequestOptions(RequestInterface $request): ?array
     {
         $options = $request->getRequestOptions();
-        if (!isset($options['query'])) {
+        if (!is_array($options)) {
+            $options = [];
+        }
+        if (!isset($options['query']) || !is_array($options['query'])) {
             $options['query'] = [];
         }
 
         // 补充 AccessToken
-        if (in_array(AgentAware::class, class_uses($request)) && !isset($options['query']['access_token'])) {
-            /** @var RequestInterface&AgentAware $request */
-            $agent = $request->getAgent();
-            if ($agent) {
-                $this->refreshAgentAccessToken($agent);
-                $token = $agent->getAccessToken();
-                $options['query']['access_token'] = $token;
+        if (in_array(AgentAware::class, class_uses($request), true) && !array_key_exists('access_token', $options['query'])) {
+            if (method_exists($request, 'getAgent')) {
+                $agent = $request->getAgent();
+                if ($agent instanceof Agent) {
+                    $this->refreshAgentAccessToken($agent);
+                    $token = $agent->getAccessToken();
+                    $options['query']['access_token'] = $token;
+                }
             }
         }
 
@@ -108,12 +234,30 @@ class WorkService extends ApiClient
         if ($request instanceof RawResponseInterface) {
             return $response->getContent();
         }
-        $json = $response->getContent();
-        $json = Json::decode($json);
-        $errCode = $json['errcode'] ?? null;
-        $errMsg = $json['errmsg'] ?? null;
+        $content = $response->getContent();
+        $json = Json::decode($content);
+
+        if (!is_array($json)) {
+            throw new HttpClientException($request, $response, '响应格式错误', 0);
+        }
+
+        $errCode = $json['errcode'] ?? 0;
+        $errMsg = $json['errmsg'] ?? '未知错误';
+
+        if (is_numeric($errCode)) {
+            $errCode = (int) $errCode;
+        } else {
+            $errCode = 0;
+        }
+
+        if (is_scalar($errMsg)) {
+            $errMsg = (string) $errMsg;
+        } else {
+            $errMsg = '未知错误';
+        }
+
         if (0 !== $errCode) {
-            throw new HttpClientException($request, $response, $errMsg, $errCode);
+            throw new GeneralHttpClientException($request, $response, $errMsg, $errCode);
         }
 
         return $json;

@@ -3,6 +3,7 @@
 namespace WechatWorkBundle\Request;
 
 use HttpClientBundle\Request\ApiRequest;
+use WechatWorkBundle\Constant\ApiPath;
 
 /**
  * 获取指定的应用详情
@@ -15,15 +16,18 @@ class GetAgentInfoRequest extends ApiRequest
 
     public function getRequestPath(): string
     {
-        return '/cgi-bin/agent/get';
+        return ApiPath::GET_AGENT_INFO;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getRequestOptions(): ?array
     {
-        if ($this->getAgent() === null) {
+        if (null === $this->getAgent()) {
             return [];
         }
-        
+
         return [
             'query' => [
                 'agentid' => $this->getAgent()->getAgentId(),

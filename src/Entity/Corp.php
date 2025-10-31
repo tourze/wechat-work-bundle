@@ -7,8 +7,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
-use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
+use Symfony\Component\Validator\Constraints as Assert;
+use Tourze\DoctrineIpBundle\Traits\IpTraceableAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
@@ -21,39 +21,44 @@ class Corp implements \Stringable, CorpInterface
 {
     use TimestampableAware;
     use BlameableAware;
+    use IpTraceableAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
-    private ?int $id = 0;
+    private int $id = 0;
 
     #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     #[ORM\Column(type: Types::STRING, length: 32, unique: true, options: ['comment' => '名称'])]
     private ?string $name = null;
 
     #[Groups(groups: ['admin_curd'])]
     #[TrackColumn]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 64)]
     #[ORM\Column(type: Types::STRING, length: 64, unique: true, options: ['comment' => '企业ID'])]
     private ?string $corpId = null;
 
+    #[Groups(groups: ['admin_curd'])]
+    #[TrackColumn]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 128)]
+    #[ORM\Column(type: Types::STRING, length: 128, nullable: false, options: ['comment' => '企业密钥'])]
+    private ?string $corpSecret = null;
+
     /**
-     * @var Collection<Agent>
+     * @var Collection<int, Agent>
      */
     #[Groups(groups: ['admin_curd'])]
     #[ORM\OneToMany(targetEntity: Agent::class, mappedBy: 'corp', cascade: ['persist'], orphanRemoval: true)]
     private Collection $agents;
 
+    #[Assert\Type(type: 'bool')]
     #[ORM\Column(nullable: true, options: ['comment' => '来自服务商授权'])]
     private ?bool $fromProvider = false;
-
-
-    #[CreateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
-    private ?string $createdFromIp = null;
-
-    #[UpdateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
-    private ?string $updatedFromIp = null;
 
     public function __construct()
     {
@@ -62,14 +67,14 @@ class Corp implements \Stringable, CorpInterface
 
     public function __toString(): string
     {
-        if ($this->getId() === null || $this->getId() === 0) {
+        if (0 === $this->getId()) {
             return '';
         }
 
-        return $this->getName();
+        return $this->getName() ?? '';
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -79,11 +84,9 @@ class Corp implements \Stringable, CorpInterface
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -97,7 +100,7 @@ class Corp implements \Stringable, CorpInterface
     public function addAgent(Agent $agent): self
     {
         if (!$this->agents->contains($agent)) {
-            $this->agents[] = $agent;
+            $this->agents->add($agent);
             $agent->setCorp($this);
         }
 
@@ -121,11 +124,19 @@ class Corp implements \Stringable, CorpInterface
         return $this->corpId;
     }
 
-    public function setCorpId(string $corpId): self
+    public function setCorpId(string $corpId): void
     {
         $this->corpId = $corpId;
+    }
 
-        return $this;
+    public function getCorpSecret(): ?string
+    {
+        return $this->corpSecret;
+    }
+
+    public function setCorpSecret(string $corpSecret): void
+    {
+        $this->corpSecret = $corpSecret;
     }
 
     public function isFromProvider(): ?bool
@@ -133,36 +144,8 @@ class Corp implements \Stringable, CorpInterface
         return $this->fromProvider;
     }
 
-    public function setFromProvider(?bool $fromProvider): static
+    public function setFromProvider(?bool $fromProvider): void
     {
         $this->fromProvider = $fromProvider;
-
-        return $this;
     }
-
-
-    public function setCreatedFromIp(?string $createdFromIp): self
-    {
-        $this->createdFromIp = $createdFromIp;
-
-        return $this;
-    }
-
-    public function getCreatedFromIp(): ?string
-    {
-        return $this->createdFromIp;
-    }
-
-    public function setUpdatedFromIp(?string $updatedFromIp): self
-    {
-        $this->updatedFromIp = $updatedFromIp;
-
-        return $this;
-    }
-
-    public function getUpdatedFromIp(): ?string
-    {
-        return $this->updatedFromIp;
-    }
-
 }

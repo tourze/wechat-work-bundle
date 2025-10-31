@@ -15,6 +15,7 @@ use WechatWorkBundle\Service\WorkService;
 class RefreshAgentAccessTokenCommand extends Command
 {
     public const NAME = 'wechat-work:refresh-agent-access-token';
+
     public function __construct(
         private readonly AgentRepository $agentRepository,
         private readonly WorkService $workService,

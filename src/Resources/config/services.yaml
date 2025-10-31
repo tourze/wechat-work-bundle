@@ -7,6 +7,8 @@ services:
 
   WechatWorkBundle\Command\:
     resource: '../../Command/'
+  WechatWorkBundle\Controller\:
+    resource: '../../Controller/'
   WechatWorkBundle\Repository\:
     resource: '../../Repository/'
   WechatWorkBundle\Service\:
