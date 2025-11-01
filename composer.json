@@ -59,7 +59,7 @@
     "tourze/phpunit-symfony-kernel-test": "1.0.*",
     "tourze/phpunit-symfony-unit-test": "1.*",
     "tourze/phpunit-symfony-web-test": "1.*",
-    "tourze/symfony-aop-async-bundle": "0.0.*",
+    "tourze/symfony-aop-async-bundle": "1.0.*",
     "tourze/symfony-schedule-entity-clean-bundle": "1.0.*"
   },
   "autoload": {
