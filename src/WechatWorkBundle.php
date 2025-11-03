@@ -17,6 +17,7 @@ use Tourze\WechatWorkContracts\AgentInterface;
 use Tourze\WechatWorkContracts\CorpInterface;
 use WechatWorkBundle\Entity\Agent;
 use WechatWorkBundle\Entity\Corp;
+use Tourze\EasyAdminMenuBundle\EasyAdminMenuBundle;
 
 class WechatWorkBundle extends Bundle implements BundleDependencyInterface
 {
@@ -46,6 +47,7 @@ class WechatWorkBundle extends Bundle implements BundleDependencyInterface
             DoctrineTrackBundle::class => ['all' => true],
             DoctrineUserBundle::class => ['all' => true],
             HttpClientBundle::class => ['all' => true],
+            EasyAdminMenuBundle::class => ['all' => true],
         ];
     }
 }
