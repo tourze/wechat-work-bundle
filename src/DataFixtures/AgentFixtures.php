@@ -19,11 +19,9 @@ class AgentFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager): void
     {
         $corp1 = $this->getReference(CorpFixtures::CORP_1_REFERENCE, Corp::class);
-        /** @phpstan-ignore function.alreadyNarrowedType,instanceof.alwaysTrue */
         assert($corp1 instanceof Corp);
 
         $corp2 = $this->getReference(CorpFixtures::CORP_2_REFERENCE, Corp::class);
-        /** @phpstan-ignore function.alreadyNarrowedType,instanceof.alwaysTrue */
         assert($corp2 instanceof Corp);
 
         // 为企业1创建代理应用
