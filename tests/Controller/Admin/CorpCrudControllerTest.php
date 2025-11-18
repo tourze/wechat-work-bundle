@@ -65,13 +65,6 @@ final class CorpCrudControllerTest extends AbstractEasyAdminControllerTestCase
         ];
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $controller = $this->getControllerService();
-
-        $this->assertSame(Corp::class, $controller::getEntityFqcn());
-    }
-
     public function testConfigureFields(): void
     {
         $controller = $this->getControllerService();

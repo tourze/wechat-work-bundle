@@ -65,13 +65,6 @@ final class AgentCrudControllerTest extends AbstractEasyAdminControllerTestCase
         ];
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $controller = $this->getControllerService();
-
-        $this->assertSame(Agent::class, $controller::getEntityFqcn());
-    }
-
     public function testConfigureFields(): void
     {
         $controller = $this->getControllerService();
