@@ -93,7 +93,6 @@ final class SpecialAgentTest extends AbstractEnumTestCase
     public function testTryFromWithNullReturnsNull(): void
     {
         $case = SpecialAgent::tryFrom('invalid-value');
-        /** @phpstan-ignore staticMethod.alreadyNarrowedType */
         self::assertNull($case);
     }
 
